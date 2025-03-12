@@ -1,358 +1,230 @@
 'use strict';
 
-// Data
-const account1 = {
-  owner: 'Jonas Schmedtmann',
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
-  interestRate: 1.2, // %
-  pin: 1111,
-  movementsDates: [
-    '2025-02-24T21:31:17.178Z',
-    '2024-05-23T07:42:02.383Z',
-    '2022-01-28T09:15:04.904Z',
-    '2022-04-01T10:17:24.185Z',
-    '2022-06-08T14:11:59.604Z',
-    '2023-09-26T17:01:17.194Z',
-    '2023-08-28T23:36:17.929Z',
-    '2021-08-01T10:51:36.790Z',
-  ],
-  currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+const modal = document.querySelector('.modal');
+const overlay = document.querySelector('.overlay');
+const btnCloseModal = document.querySelector('.btn--close-modal');
+const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
+
+const btnScroll = document.querySelector('.btn--scroll-to');
+const section1 = document.querySelector('#section--1');
+
+const tabs = document.querySelectorAll('.operations__tab');
+const tabContainer = document.querySelector('.operations__tab-container');
+const tabContent = document.querySelectorAll('.operations__content');
+
+const nav = document.querySelector('.nav');
+
+const header = document.querySelector('.header');
+
+const allSections = document.querySelectorAll('.section');
+
+const imgTargets = document.querySelectorAll('img[data-src]');
+
+const slides = document.querySelectorAll('.slide');
+const btnRight = document.querySelector('.slider__btn--right');
+const btnLeft = document.querySelector('.slider__btn--left');
+const dotsContainer = document.querySelector('.dots');
+
+///////////////////////////////////////
+// Modal window
+
+const openModal = function () {
+  modal.classList.remove('hidden');
+  overlay.classList.remove('hidden');
 };
 
-const account2 = {
-  owner: 'Jessica Davis',
-  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
-  interestRate: 1.5,
-  pin: 2222,
-  movementsDates: [
-    '2024-11-01T13:15:33.035Z',
-    '2024-11-30T09:48:16.867Z',
-    '2023-12-25T06:04:23.907Z',
-    '2023-01-25T14:18:46.235Z',
-    '2023-02-05T16:33:06.386Z',
-    '2021-04-10T14:43:26.374Z',
-    '2021-06-25T18:49:59.371Z',
-    '2021-07-26T12:01:20.894Z',
-  ],
-  currency: 'USD',
-  locale: 'en-US',
+const closeModal = function () {
+  modal.classList.add('hidden');
+  overlay.classList.add('hidden');
 };
 
-const account3 = {
-  owner: 'Steven Thomas Williams',
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
-  movementsDates: [
-    '2025-01-18T21:31:17.178Z',
-    '2024-12-23T07:42:02.383Z',
-    '2024-01-28T09:15:04.904Z',
-    '2024-04-01T10:17:24.185Z',
-    '2023-05-08T14:11:59.604Z',
-    '2023-07-26T17:01:17.194Z',
-    '2022-07-28T23:36:17.929Z',
-    '2022-08-01T10:51:36.790Z',
-  ],
-  currency: 'EUR',
-  locale: 'pt-PT', // de-DE
-};
+for (let i = 0; i < btnsOpenModal.length; i++)
+  btnsOpenModal[i].addEventListener('click', openModal);
 
-const account4 = {
-  owner: 'Sarah Smith',
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
-  movementsDates: [
-    '2022-11-01T13:15:33.035Z',
-    '2022-10-30T09:48:16.867Z',
-    '2022-12-25T06:04:23.907Z',
-    '2023-02-25T14:18:46.235Z',
-    '2023-03-05T16:33:06.386Z',
-  ],
-  currency: 'USD',
-  locale: 'en-US',
-};
+btnCloseModal.addEventListener('click', closeModal);
+overlay.addEventListener('click', closeModal);
 
-const accounts = [account1, account2, account3, account4];
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    closeModal();
+  }
+});
 
-// Elements
-const labelWelcome = document.querySelector('.welcome');
-const labelDate = document.querySelector('.date');
-const labelBalance = document.querySelector('.balance__value');
-const labelSumIn = document.querySelector('.summary__value--in');
-const labelSumOut = document.querySelector('.summary__value--out');
-const labelSumInterest = document.querySelector('.summary__value--interest');
-const labelTimer = document.querySelector('.timer');
+// ‌‌‌BTN FOR SCROLLING
+btnScroll.addEventListener('click', function (e) {
+  e.preventDefault();
+  // Scrolling
+  section1.scrollIntoView({ behavior: 'smooth' });
+});
 
-const containerApp = document.querySelector('.app');
-const containerMovements = document.querySelector('.movements');
+// NAVIGATION
+document.querySelector('.nav__links').addEventListener('click', function (e) {
+  e.preventDefault();
+  if (e.target.classList.contains('nav__link')) {
+    const id = e.target.getAttribute('href');
+    document.querySelector(id).scrollIntoView({ behavior: 'smooth' });
+  }
+});
 
-const btnLogin = document.querySelector('.login__btn');
-const btnTransfer = document.querySelector('.form__btn--transfer');
-const btnLoan = document.querySelector('.form__btn--loan');
-const btnClose = document.querySelector('.form__btn--close');
-const btnSort = document.querySelector('.btn--sort');
+// Tabbed Component
 
-const inputLoginUsername = document.querySelector('.login__input--user');
-const inputLoginPin = document.querySelector('.login__input--pin');
-const inputTransferTo = document.querySelector('.form__input--to');
-const inputTransferAmount = document.querySelector('.form__input--amount');
-const inputLoanAmount = document.querySelector('.form__input--loan-amount');
-const inputCloseUsername = document.querySelector('.form__input--user');
-const inputClosePin = document.querySelector('.form__input--pin');
+tabContainer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const clicked = e.target.closest('.operations__tab');
+  console.log(clicked);
 
-function calcDate(date, locale) {
-  const calcDaysPassed = (date1, date2) =>
-    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  if (!clicked) return;
 
-  const daysPassed = calcDaysPassed(new Date(), date);
+  // Removing Tab and Content
+  tabs.forEach(t => t.classList.remove('operations__tab--active'));
+  tabContent.forEach(c => c.classList.remove('operations__content--active'));
 
-  if (daysPassed === 0) return 'Today';
-  if (daysPassed === 1) return 'Yesterday';
-  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  // Active Tab
+  clicked.classList.toggle('operations__tab--active');
 
-  return new Intl.DateTimeFormat(locale).format(date);
+  // Activate Content
+  document
+    .querySelector(`.operations__content--${clicked.dataset.tab}`)
+    .classList.add('operations__content--active');
+});
+
+const navHeight = nav.getBoundingClientRect().height;
+
+//Fade Animation
+function handleFade(e) {
+  if (e.target.classList.contains('nav__link')) {
+    const link = e.target;
+    const siblings = link.closest('.nav').querySelectorAll('.nav__link');
+    const logo = link.closest('.nav').querySelector('img');
+    siblings.forEach(el => {
+      if (el !== link) el.style.opacity = this;
+    });
+    logo.style.opacity = this;
+  }
+}
+nav.addEventListener('mouseover', handleFade.bind(0.5));
+nav.addEventListener('mouseout', handleFade.bind(1));
+
+// Sticky Navigation
+
+function stickyNavbar(entries) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) nav.classList.add('sticky');
+  else nav.classList.remove('sticky');
 }
 
-function displayMovements(account, sort = false) {
-  containerMovements.innerHTML = '';
+const headerObserver = new IntersectionObserver(stickyNavbar, {
+  root: null,
+  threshold: 0,
+  rootMargin: `-${navHeight}px`,
+});
 
-  const combinedMovsDates = account.movements.map((mov, i) => ({
-    movement: mov,
-    movementDate: account.movementsDates.at(i),
-  }));
+headerObserver.observe(header);
 
-  if (sort) combinedMovsDates.sort((a, b) => a.movement - b.movement);
-  combinedMovsDates.forEach(function (obj, i) {
-    const { movement, movementDate } = obj;
-    const type = movement > 0 ? 'deposit' : 'withdrawal';
+// Reveal Section
+function sectionObs(entries, observer) {
+  const [entry] = entries;
 
-    const date = new Date(movementDate);
-    const displayDate = calcDate(date, account.locale);
+  if (!entry.isIntersecting) return;
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+}
+const sectionObserver = new IntersectionObserver(sectionObs, {
+  root: null,
+  threshold: 0.15,
+});
+allSections.forEach(function (section) {
+  sectionObserver.observe(section);
+  // section.classList.add('section--hidden');
+});
 
-    // const formattedMov = formatCur(movement, account.locale, account.currency);
+//Lazy loading Images
 
-    const html = `
-      <div class="movements__row">
-        <div class="movements__type movements__type--${type}">${
-      i + 1
-    } ${type}</div>
-        <div class="movements__date">${displayDate}</div>
-        <div class="movements__value">${movement.toFixed(2)}$</div>
-      </div>
-    `;
+function loadImg(entries, observer) {
+  const [entry] = entries;
 
-    containerMovements.insertAdjacentHTML('afterbegin', html);
+  if (!entry.isIntersecting) return;
+  entry.target.src = entry.target.dataset.src;
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
   });
+  observer.unobserve(entry.target);
 }
 
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
-
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-function calcPrintBalance(account) {
-  account.balance = account.movements.reduce((acc, cur) => acc + cur, 0);
-  labelBalance.textContent = ` ${account.balance.toFixed(2)}$`;
-}
-
-function clacDisplaySummary(account) {
-  const incomes = account.movements
-    .filter(mov => mov > 0)
-    .reduce((acc, cur) => acc + cur, 0);
-
-  const outcomes = account.movements
-    .filter(mov => mov < 0)
-    .reduce((acc, cur) => acc + cur, 0);
-
-  const interest = account.movements
-    .filter(mov => mov > 0)
-    .map(mov => (mov * account.interestRate) / 100)
-    .filter(mov => mov >= 1)
-    .reduce((acc, cur) => acc + cur, 0);
-
-  labelSumIn.textContent = `${incomes.toFixed(2)}$`;
-  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}$`;
-  labelSumInterest.textContent = `${interest.toFixed(2)}$`;
-}
-
-function createUserName(accs) {
-  accs.forEach(function (acc) {
-    acc.username = acc.owner
-      .toLowerCase()
-      .split(' ')
-      .map(name => name[0])
-      .join('');
-  });
-}
-
-createUserName(accounts);
-
-let currentAccount, timer;
-
-btnLogin.addEventListener('click', function (e) {
-  e.preventDefault();
-
-  currentAccount = accounts.find(
-    acc => acc.username === inputLoginUsername.value
-  );
-
-  if (currentAccount?.pin === +inputLoginPin.value) {
-    // clear input fields
-    clear(inputLoginPin, inputLoginUsername);
-
-    //Diplay Ui and message
-    labelWelcome.textContent = `Welcome back  ${
-      currentAccount.owner.split(' ')[0]
-    }`;
-    containerApp.style.opacity = '1';
-
-    // Display the Current Date
-
-    const now = new Date();
-    const options = {
-      hour: 'numeric',
-      minute: 'numeric',
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-    };
-    const currentDate = new Intl.DateTimeFormat(
-      currentAccount.locale,
-      options
-    ).format(now);
-
-    labelDate.textContent = currentDate;
-
-    if (timer) clearInterval(timer);
-    timer = logoutTimer();
-
-    // Display
-    display(currentAccount);
-  }
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: '100px',
 });
 
-// Transfer
+imgTargets.forEach(img => imgObserver.observe(img));
 
-btnTransfer.addEventListener('click', function (e) {
-  e.preventDefault();
+// slider
 
-  const amount = +inputTransferAmount.value;
-  const reciverAccount = accounts.find(
-    acc => acc.username === inputTransferTo.value
-  );
+let curSlide = 0;
+let maxSlide = slides.length;
 
-  if (
-    reciverAccount &&
-    amount > 0 &&
-    currentAccount.balance >= amount &&
-    reciverAccount.username !== currentAccount.username
-  ) {
-    reciverAccount.movements.push(amount);
-    currentAccount.movements.push(-amount);
-    currentAccount.movementsDates.push(new Date().toISOString());
-    reciverAccount.movementsDates.push(new Date().toISOString());
-    display(currentAccount);
-    clear(inputTransferAmount, inputTransferTo);
+// Start of the Slider
+function init() {
+  createDots();
+  goToslide(0);
+  activateDot(curSlide);
+}
+init();
 
-    // Reset Timer
-    clearInterval(timer);
-    timer = logoutTimer();
-  }
-});
-
-// Loan
-
-btnLoan.addEventListener('click', function (e) {
-  e.preventDefault();
-
-  const amount = Math.floor(inputLoanAmount.value);
-
-  if (amount > 0 && currentAccount.movements.some(acc => acc > amount * 0.1)) {
-    setTimeout(function () {
-      currentAccount.movements.push(amount);
-      currentAccount.movementsDates.push(new Date().toISOString());
-      // ubdate UI
-      display(currentAccount);
-    }, 2500);
-
-    clear(inputLoanAmount, inputClosePin);
-
-    // Reset Timer
-    clearInterval(timer);
-    timer = logoutTimer();
-  }
-});
-
-btnClose.addEventListener('click', function (e) {
-  e.preventDefault();
-  if (
-    currentAccount.username === inputCloseUsername.value &&
-    currentAccount.pin === +inputClosePin.value
-  ) {
-    const index = accounts.findIndex(
-      acc => acc.username === currentAccount.username
+// Functions
+function createDots() {
+  slides.forEach(function (_, i) {
+    dotsContainer.insertAdjacentHTML(
+      'beforeend',
+      `
+      <button class='dots__dot' data-slide='${i}'></button>`
     );
+  });
+}
 
-    // Delete account
-    accounts.splice(index, 1);
-    // Hide UI
-    containerApp.style.opacity = '0';
-  }
-  // Clear inputs
-  clear(inputCloseUsername, inputClosePin);
+function activateDot(slide) {
+  document
+    .querySelectorAll('.dots__dot')
+    .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+  document
+    .querySelector(`.dots__dot[data-slide='${slide}']`)
+    .classList.add('dots__dot--active');
+}
+
+function goToslide(slide) {
+  slides.forEach(
+    (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+  );
+}
+
+function nextSlide() {
+  curSlide === maxSlide - 1 ? (curSlide = 0) : curSlide++;
+  goToslide(curSlide);
+  activateDot(curSlide);
+}
+function prevSlide() {
+  curSlide === 0 ? (curSlide = maxSlide - 1) : curSlide--;
+  goToslide(curSlide);
+  activateDot(curSlide);
+}
+
+// Event Handlers
+
+btnRight.addEventListener('click', nextSlide);
+
+btnLeft.addEventListener('click', prevSlide);
+
+document.addEventListener('keydown', function (e) {
+  e.key === 'ArrowLeft' && prevSlide();
+  e.key === 'ArrowRight' && nextSlide();
 });
 
-function clear(input1, input2) {
-  input1.value = input2.value = '';
-  input1.blur();
-  input2.blur();
-}
-
-function display(cur) {
-  // Display movements
-  displayMovements(cur);
-  // Display balance
-
-  calcPrintBalance(cur);
-  // Display summary
-  clacDisplaySummary(cur);
-}
-
-// Sort
-let sorted = false;
-btnSort.addEventListener('click', function (e) {
-  e.preventDefault();
-  // BUG in video:
-  // displayMovements(currentAccount.movements, !sorted);
-
-  // FIX:
-  displayMovements(currentAccount, !sorted);
-  sorted = !sorted;
-});
-
-// logout Timer
-function logoutTimer() {
-  let time = 300;
-  function tick() {
-    const min = String(Math.trunc(time / 60)).padStart(2, 0);
-    const sec = String(Math.trunc(time % 60)).padStart(2, 0);
-
-    labelTimer.textContent = `${min}:${sec}`;
-
-    if (time === 0) {
-      clearInterval(timer);
-      labelWelcome.textContent = 'Log in to get started';
-      containerApp.style.opacity = 0;
-    }
-
-    time--;
+dotsContainer.addEventListener('click', function (e) {
+  if (e.target.classList.contains('dots__dot')) {
+    const { slide } = e.target.dataset;
+    goToslide(slide);
+    activateDot(slide);
   }
-  tick();
-  const timer = setInterval(tick, 1000);
-  return timer;
-}
+});
